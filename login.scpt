@@ -1,3 +1,7 @@
+set opUsername to do shell script "/opt/homebrew/bin/op item get \"Okta-emea GDS\" --fields username"
+set opOTP to do shell script "/opt/homebrew/bin/op item get \"Okta-emea GDS\" --otp"
+set opPassword to do shell script "/opt/homebrew/bin/op item get \"Okta-emea GDS\" --fields password --reveal"
+
 -- Activate (open) the specified application
 tell application "Omnissa Horizon Client"
 	activate
@@ -17,9 +21,7 @@ tell application "System Events"
 end tell
 
 
-set opUsername to do shell script "/opt/homebrew/bin/op item get \"Okta-emea GDS\" --fields username"
-set opOTP to do shell script "/opt/homebrew/bin/op item get \"Okta-emea GDS\" --otp"
-set opPassword to do shell script "/opt/homebrew/bin/op item get \"Okta-emea GDS\" --fields password --reveal"
+
 
 tell application "Google Chrome" to tell active tab of window 1
 	execute javascript "document.getElementById('loginButton').click()"
@@ -48,7 +50,7 @@ tell application "System Events"
 		set frontmost to true
 		
 		-- Wait until Connection > Disconnect menu item is enabled (not disabled)
-		repeat until (enabled of menu item "Disconnect" of menu "Connection" of menu bar 1)
+		repeat until (enabled of menu item "Log Off" of menu "Connection" of menu bar 1)
 			delay 0.5 -- half-second pause before checking again
 		end repeat
 	end tell
