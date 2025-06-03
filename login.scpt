@@ -14,10 +14,10 @@ on enterPasswordIntoVDI()
 				delay 0.5 -- half-second pause before checking again
 			end repeat
 			
-			repeat until (my OmnissaScreenshoot("assword"))
-				delay 0.5
+			repeat until (my OmnissaScreenshoot("Password"))
 				log "waiting for login prompt"
 				keystroke return
+				delay 2
 			end repeat
 			
 			delay 0.5
@@ -59,7 +59,7 @@ on startBrowserAuth()
 	tell application "System Events"
 		tell process "Omnissa Horizon Client"
 			set frontmost to true
-			delay 0.5
+			delay 1
 			repeat until exists button "Sign in via Browser" of window 1
 				log "waiting for sign in via browser button"
 				delay 0.1
@@ -144,7 +144,7 @@ on OmnissaScreenshoot(stringToLookFor)
 	do shell script "/opt/homebrew/bin/tesseract " & savePath2 & " stdout"
 	
 	set OCROutput to do shell script "/opt/homebrew/bin/tesseract " & savePath2 & " stdout"
-	
+	log OCROutput
 	return OCROutput contains stringToLookFor
 	
 end OmnissaScreenshoot
