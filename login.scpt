@@ -5,16 +5,21 @@ on enterPasswordIntoVDI()
 	tell application "Omnissa Horizon Client"
 		activate
 	end tell
-	delay 0.2
 	
 	tell application "System Events"
 		tell process "Omnissa Horizon Client"
 			set frontmost to true
 			repeat until (enabled of menu item "Log Off" of menu "Connection" of menu bar 1)
+				log "waiting for log off option in menu"
 				delay 0.5 -- half-second pause before checking again
 			end repeat
-			delay 0.5
-			keystroke return
+			
+			repeat until (my OmnissaScreenshoot("assword"))
+				delay 0.5
+				log "waiting for login prompt"
+				keystroke return
+			end repeat
+			
 			delay 0.5
 			set textLength to length of opPassword
 			repeat with i from 1 to textLength
@@ -54,8 +59,9 @@ on startBrowserAuth()
 	tell application "System Events"
 		tell process "Omnissa Horizon Client"
 			set frontmost to true
-			
+			delay 0.5
 			repeat until exists button "Sign in via Browser" of window 1
+				log "waiting for sign in via browser button"
 				delay 0.1
 			end repeat
 			click button "Sign in via Browser" of window 1
@@ -71,23 +77,78 @@ on startBrowserAuth()
 		execute javascript "document.getElementById('loginButton').click()"
 		delay 1
 		-- if horizon needs a login, do that, but it might already be authed
-		if (execute javascript "document.getElementById('launched-title').textContent.includes('Horizon Client Launched')") then
+		if (execute javascript "document.body.textContent.includes('Horizon Client Launched')") then
 			log "looks like browser already authed"
 		else
+			repeat until (execute javascript "document.body.textContent.includes('Username')")
+				delay 0.1
+				log "waiting for username prompt"
+			end repeat
+			delay 0.5
+			
 			execute javascript "document.querySelector('input[name=\"identifier\"]').value = '" & opUsername & "'"
 			execute javascript "document.querySelector('input[name=\"identifier\"]').dispatchEvent(new Event('input', { bubbles: true }))"
 			execute javascript "document.querySelector('input[value=\"Next\"]').click();"
 			
-			delay 1
+			delay 0.5
+			
+			delay 0.5
+			if (execute javascript "document.body.textContent.includes('Select from the following options')") then
+				execute javascript "document.querySelector('a[aria-label=\"Select Google Authenticator.\"]').click()"
+			end if
+			
+			repeat until (execute javascript "document.body.textContent.includes('Enter the temporary code')")
+				delay 0.1
+				log "waiting for passcode prompt"
+			end repeat
+			delay 0.5
 			
 			execute javascript "document.querySelector('input[name=\"credentials.passcode\"]').value = '" & opOTP & "'"
 			execute javascript "document.querySelector('input[name=\"credentials.passcode\"]').dispatchEvent(new Event('input', { bubbles: true }))"
 			execute javascript "document.querySelector('input[value=\"Verify\"]').click();"
 		end if
+		repeat until (execute javascript "document.body.textContent.includes('Horizon Client Launched')")
+			delay 0.1
+		end repeat
 	end tell
 	
 	my enterPasswordIntoVDI()
 end startBrowserAuth
+
+
+
+on OmnissaScreenshoot(stringToLookFor)
+	set appName to "Omnissa Horizon Client"
+	
+	tell application "System Events"
+		if not (exists process appName) then
+			display alert appName & " is not running."
+			return
+		end if
+		tell process appName
+			set {xPos, yPos} to position of front window
+			set {w, h} to size of front window
+		end tell
+	end tell
+	
+	--set tempFolder to (path to temporary items as string)
+	set tempFolder to POSIX path of (path to temporary items)
+	
+	set savePath to tempFolder & "/horizon.png"
+	set savePath2 to tempFolder & "/horizon2.png"
+	
+	do shell script "screencapture -x -R" & xPos & "," & yPos & "," & w & "," & h & " " & quoted form of savePath
+	
+	do shell script "/opt/homebrew/bin/magick " & savePath & " -brightness-contrast 0x50 " & savePath2
+	
+	do shell script "/opt/homebrew/bin/tesseract " & savePath2 & " stdout"
+	
+	set OCROutput to do shell script "/opt/homebrew/bin/tesseract " & savePath2 & " stdout"
+	
+	return OCROutput contains stringToLookFor
+	
+end OmnissaScreenshoot
+
 
 tell application "Omnissa Horizon Client"
 	activate
