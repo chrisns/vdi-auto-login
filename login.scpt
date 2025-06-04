@@ -141,7 +141,6 @@ on OmnissaScreenshoot(stringToLookFor)
 	
 	do shell script "/opt/homebrew/bin/magick " & savePath & " -brightness-contrast 0x50 " & savePath2
 	
-	do shell script "/opt/homebrew/bin/tesseract " & savePath2 & " stdout"
 	
 	set OCROutput to do shell script "/opt/homebrew/bin/tesseract " & savePath2 & " stdout"
 	log OCROutput
