@@ -43,7 +43,7 @@ on enterPasswordIntoVDI()
 				else
 					keystroke currentChar
 				end if
-				delay 0.1 -- half-second pause between each keystroke
+                                delay 0.1 -- short pause between each keystroke
 			end repeat
 			
 			delay 2
