@@ -14,7 +14,7 @@ on enterPasswordIntoVDI()
 				delay 0.5 -- half-second pause before checking again
 			end repeat
 			
-			repeat until (my OmnissaScreenshoot("Password"))
+			repeat until (my OmnissaScreenshot("Password"))
 				log "waiting for login prompt"
 				keystroke return
 				delay 2
@@ -117,7 +117,7 @@ end startBrowserAuth
 
 
 
-on OmnissaScreenshoot(stringToLookFor)
+on OmnissaScreenshot(stringToLookFor)
 	set appName to "Omnissa Horizon Client"
 	
 	tell application "System Events"
@@ -147,7 +147,7 @@ on OmnissaScreenshoot(stringToLookFor)
 	log OCROutput
 	return OCROutput contains stringToLookFor
 	
-end OmnissaScreenshoot
+end OmnissaScreenshot
 
 
 tell application "Omnissa Horizon Client"
